@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="description" content="Track good deeds and earn rewards every day!" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Good Deeds" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <title>✨ Good Deeds Tracker</title>
+
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background: #1a1a2e;
+        font-family: 'Nunito', 'Segoe UI', sans-serif;
+        overscroll-behavior: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #root { min-height: 100vh; }
+
+      /* Install Banner */
+      #install-banner {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2d6a4f;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 700;
+        z-index: 9999;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        cursor: pointer;
+        white-space: nowrap;
+        gap: 8px;
+        align-items: center;
+      }
+      #install-banner.show { display: flex; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Install to Home Screen Banner -->
+    <div id="install-banner" onclick="installApp()">
+      📲 Add to Home Screen
+    </div>
+
+    <script type="module" src="/src/main.jsx"></script>
+
+    <script>
+      // PWA Install Prompt
+      let deferredPrompt;
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('install-banner').classList.add('show');
+      });
+
+      function installApp() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(() => {
+            deferredPrompt = null;
+            document.getElementById('install-banner').classList.remove('show');
+          });
+        }
+      }
+
+      window.addEventListener('appinstalled', () => {
+        document.getElementById('install-banner').classList.remove('show');
+      });
+
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered:', reg.scope))
+            .catch(err => console.log('SW error:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
